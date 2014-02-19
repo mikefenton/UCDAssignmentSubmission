@@ -157,7 +157,7 @@ def send_email(student, subject, body, attachment):
     Sends a confirmation of submission email to the student's UCD 
     Connect email address using their student number.
     """
-    fromaddr = 'ucdassignmentsubmission@ucd.ie'
+    fromaddr = '***************@*****.com'
     toaddrs = str(student['email'])
     msg = mime.Multipart.MIMEMultipart()
     msg['Subject'] = str(subject)
@@ -175,8 +175,8 @@ def send_email(student, subject, body, attachment):
                   ) + ' ' + str(student['assignment'])
         att.add_header('Content-Disposition', 'attachment', filename = name)
         msg.attach(att)
-    username = 'UCDAssign'
-    password = 'assessment2013'
+    username = '**************'
+    password = '**************'
     server = SMTP('smtp.ucd.ie:587')
     server.ehlo()
     server.starttls()
