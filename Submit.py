@@ -11,7 +11,7 @@ for that particular course.
 
 If the submission is successful the student is shown a "success"
 image and the program automatically sends them an email notifying them
-of their successful submission. If there is a problem, however, 
+of their successful submission. If there is a problem, however,
 an email is sent to maintenance with details of the issue."""
 
 from os.path import join
@@ -31,27 +31,30 @@ from os import path, chdir
 import Image
 import email.mime.application
 
-
 DEBUG = False
+
 
 def assignment_submission(cur_dir):
     """
     Records the time of submission and updates the spreadsheet
-    """   
+    """
     values = decode()
     if not values[0]:
         failure(str(values[1]), cur_dir)
         exit()
-    else:        
+    else:
         text = values[0].split('\n')
-        student = {'student':text[2], 'course':text[0], 'assignment':text[1],
-                   'student number':"%08d" % int(float(text[3])),
-                   'email':text[4], 'time':values[1]}
+        student = {'student': text[2],
+                   'course': text[0],
+                   'assignment': text[1],
+                   'student number': "%08d" % int(float(text[3])),
+                   'email': text[4],
+                   'time': values[1]}
         if len(text) != 5:
             failure("QR Code Error: Insufficient information in QR code",
                     cur_dir)
             exit()
-        deadline = save_excel(student, cur_dir)          
+        deadline = save_excel(student, cur_dir)
     amount = deadline - student['time']
     if student['time'] > deadline:
         expired(cur_dir, abs(amount))
@@ -63,9 +66,9 @@ def assignment_submission(cur_dir):
                    ) + ' has expired by ' + str(amount
                    )+ '. Your submission at ' + str(student['time']
                    ) + " has been accepted, but the module coordinator has"\
-                   "been notified."
+                   " been notified."
             send_email(student, subject, body, None)
-    else:   
+    else:
         success(cur_dir)
         if not DEBUG:
             subject = "UCD " + str(student['course']) + ' assignment: ' + str(
@@ -74,6 +77,7 @@ def assignment_submission(cur_dir):
                    ) + ' ' + str(student['assignment']) + ' at ' + str(
                    student['time']) + "."
             send_email(student, subject, body, None)
+
 
 def decode():
     """
@@ -89,6 +93,7 @@ def decode():
             return [None, result[1]]
     else:
         return [None, "Failed to initialise webcam"]
+
 
 def save_excel(student, cur_dir):
     """
@@ -114,7 +119,7 @@ def save_excel(student, cur_dir):
               ) + "\t" + str(student['assignment']) + "\n")
     log.close()
     book = open_workbook(join(str(cur_dir) + '/grive/' + str(
-        student['course']) + ".xls"), formatting_info = True, on_demand = True)
+        student['course']) + ".xls"), formatting_info=True, on_demand=True)
     worksheet = book.sheet_by_name(str(student['assignment']))
     num_rows = worksheet.nrows - 1
     # Check submission deadline
@@ -126,7 +131,7 @@ def save_excel(student, cur_dir):
     work_book = copy(book)
     worksheet = get_sheet_by_name(work_book, student['assignment'])
     # look through all the student entries, match student number
-    for i in range(num_rows-2):        
+    for i in range(num_rows-2):
         if not int(book.sheet_by_name(str(student['assignment'])).cell(
                    i+3, 1).value) == int(student['student number']):
             if i == num_rows-3:
@@ -134,7 +139,7 @@ def save_excel(student, cur_dir):
                        "on course " + str(student['course']) + " master "\
                        "spreadsheet", cur_dir)
                 exit()
-        else:    
+        else:
             worksheet.write(i+3, 5, str(student['time']))
             if student['time'] > student['deadline']:
                 worksheet.write(i+3, 6, "Deadline Expired")
@@ -142,6 +147,7 @@ def save_excel(student, cur_dir):
     work_book.save(join(str(cur_dir) + '/grive/' + str(
             student['course']) + ".xls"))
     return student['deadline']
+
 
 def get_sheet_by_name(book, name):
     """
@@ -152,12 +158,13 @@ def get_sheet_by_name(book, name):
         if sheet.name == name:
             return sheet
 
-def send_email(student, subject, body, attachment):   
+
+def send_email(student, subject, body, attachment):
     """
-    Sends a confirmation of submission email to the student's UCD 
+    Sends a confirmation of submission email to the student's UCD
     Connect email address using their student number.
     """
-    fromaddr = '***************@*****.com'
+    fromaddr = 'ucdassignmentsubmission@gmail.com'
     toaddrs = str(student['email'])
     msg = mime.Multipart.MIMEMultipart()
     msg['Subject'] = str(subject)
@@ -175,14 +182,15 @@ def send_email(student, subject, body, attachment):
                   ) + ' ' + str(student['assignment'])
         att.add_header('Content-Disposition', 'attachment', filename = name)
         msg.attach(att)
-    username = '**************'
-    password = '**************'
-    server = SMTP('smtp.ucd.ie:587')
+    username = 'UCDassignmentsubmission'
+    password = 'assessment2013'
+    server = SMTP(host='smtp.gmail.com', port=587)
     server.ehlo()
     server.starttls()
     server.login(username, password)
     server.sendmail(fromaddr, toaddrs, msg.as_string())
     server.quit()
+
 
 def success(cur_dir):
     """
@@ -214,6 +222,7 @@ def success(cur_dir):
     root.after(4000, root.destroy)
     root.mainloop()
 
+
 def expired(cur_dir, amount):
     """
     Displays a "deadline expired" picture
@@ -231,7 +240,7 @@ def expired(cur_dir, amount):
     # Pack a canvas into the top level window.
     # This will be used to place the image
     expired_canvas = Canvas(root)
-    expired_canvas.pack(fill = "both", expand = True)
+    expired_canvas.pack(fill="both", expand=True)
     # Open the image
     imgtk = PhotoImage(img)
     # Get the top level window size
@@ -240,13 +249,14 @@ def expired(cur_dir, amount):
     cwidth = root.winfo_width()
     cheight =  root.winfo_height()
     # create the image on the canvas
-    expired_canvas.create_image(cwidth/2, cheight/2.1, image = imgtk)
-    Button(root, text = 'Deadline Expired by ' + str(amount
+    expired_canvas.create_image(cwidth/2, cheight/2.1, image=imgtk)
+    Button(root, text='Deadline Expired by ' + str(amount
           ) + '. Assignment Submitted, time '\
-          'noted', width = 80, height = 2, command = root.destroy).pack()
+          'noted', width=80, height=2, command=root.destroy).pack()
     root.after(5000, root.destroy)
     root.mainloop()
-    
+
+
 def failure(reason, cur_dir):
     """
     Displays a "submission failure" picture and emails
@@ -282,8 +292,9 @@ def failure(reason, cur_dir):
     root.after(5000, root.destroy)
     root.mainloop()
 
+
 if __name__ == '__main__':
-    CURRENT_DIR = path.expanduser('~') + "/Dropbox/QR"    
+    CURRENT_DIR = path.expanduser('~') + "/Dropbox/QR"
     assignment_submission(CURRENT_DIR)
     # change directory to sync the course master spreadsheets
     chdir(str(CURRENT_DIR) + "/grive")
